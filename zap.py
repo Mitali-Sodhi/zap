@@ -3,6 +3,8 @@
 import sys
 import os
 import sqlite3
+import colorama
+from colorama import Fore, Back, Style
 
 
 def start():
@@ -10,7 +12,7 @@ def start():
         print "Your Zap list already intialized. Use 'zap add' to add new tasks"
     else:
         conn = sqlite3.connect("/tmp/zap.db")
-        conn.execute('''CREATE TABLE tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, task TEXT NOT NULL, tag TEXT NOT NULL, priority TEXT NOT NULL, added_on TIMESTAMP);''')
+        conn.execute('''CREATE TABLE tasks (id INTEGER PRIMARY KEY , task TEXT NOT NULL, tag TEXT NOT NULL, priority TEXT NOT NULL, added_on TIMESTAMP);''')
         conn.close()
         print "Zap list initialized Successfully. Use 'zap add' to add new tasks"
 
@@ -70,9 +72,19 @@ def show(params):
     else:
         conn = sqlite3.connect("/tmp/zap.db")
         cursor = conn.execute("SELECT * FROM tasks")
-        for row in cursor:
-            print "-" * 40
-            print row[0], "\t", row[1], "\t", row[2], "\t", row[3], "\t", row[4], "\n"
+        data = cursor.fetchall()
+        if len(data) == 0:
+            print "Your Zap list is empty. Add a new list by zap add <task> <tag> <priority>"
+        else:
+            for row in data:
+                print "-" * 60
+                if row[3] == "high":
+                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.RED + row[3]),(Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"
+                elif row[3] == "normal":
+                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.YELLOW + row[3]),(Fore.RESET + Back.RESET + Style.RESET_ALL),row[4], "\n"
+                elif row[3] == "low":
+                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.GREEN + row[3]),(Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"        
+
         conn.close()
 
 
@@ -85,11 +97,19 @@ def done(params):
         params = params.split(',')
         conn = sqlite3.connect("/tmp/zap.db")
         for item in params:
-            query_string = "DELETE from tasks where ID=%s" % int(item)
-            conn.execute(query_string)
-            conn.commit()
-            conn.close()
-            print item, "successfully deleted from your Zap list"
+            if item.isdigit() :
+                query_string = "DELETE from tasks where ID=%s" % int(item)
+                conn.execute(query_string)
+                conn.execute("DELETE from sqlite_sequence where name='tasks'")
+                conn.commit()
+                print item, "successfully deleted from your Zap list"
+            else:
+                query_string = "DELETE from tasks where task='%s'" % item
+                conn.execute(query_string)
+                conn.execute("DELETE from sqlite_sequence where name='tasks'")
+                conn.commit()
+                print item, "successfully deleted from your Zap list"
+        conn.close()
 
 
 def clean(params):
@@ -101,6 +121,7 @@ def clean(params):
         if confirmation.lower().startswith("y"):
             conn = sqlite3.connect("/tmp/zap.db")
             conn.execute("DELETE from tasks")
+            conn.execute("DELETE from sqlite_sequence where name='tasks'")
             conn.commit()
             conn.close()
             print "Cleaned up your Zap list"
