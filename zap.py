@@ -56,12 +56,11 @@ def add(params):
     elif len(sys.argv) > 5:
         print "Illegal Parameters"
         sys.exit(0)
-    query_string = "INSERT INTO tasks (task,tag,priority,added_on) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP);"%(task_name,tag,priority)
+    query_string = "INSERT INTO tasks (task,tag,priority,added_on) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP);" % (task_name, tag, priority)
     conn.execute(query_string)
     print task_name, "added successfully to your Zap list :)"
     conn.commit()
     conn.close()
-
 
 
 def show(params):
@@ -73,9 +72,8 @@ def show(params):
         cursor = conn.execute("SELECT * FROM tasks")
         for row in cursor:
             print "-" * 40
-            print row[0],"\t",row[1],"\t",row[2],"\t",row[3],"\t",row[4],"\n"
+            print row[0], "\t", row[1], "\t", row[2], "\t", row[3], "\t", row[4], "\n"
         conn.close()
-
 
 
 def done(params):
@@ -87,13 +85,25 @@ def done(params):
         params = params.split(',')
         conn = sqlite3.connect("/tmp/zap.db")
         for item in params:
-            query_string = "DELETE from tasks where ID=%s"%int(item)
-            cursor = conn.execute("DELETE from tasks where ID='%s'"%item)
+            query_string = "DELETE from tasks where ID=%s" % int(item)
+            conn.execute(query_string)
             conn.commit()
+            conn.close()
+            print item, "successfully deleted from your Zap list"
 
 
-def clean():
-    raise NotImplementedError
+def clean(params):
+    if len(params) > 2:
+        print "Illegal Parameters"
+        sys.exit(0)
+    else:
+        confirmation = raw_input("Are you sure (y/n)?")
+        if confirmation.lower().startswith("y"):
+            conn = sqlite3.connect("/tmp/zap.db")
+            conn.execute("DELETE from tasks")
+            conn.commit()
+            conn.close()
+            print "Cleaned up your Zap list"
 
 
 if __name__ == '__main__':
@@ -112,7 +122,7 @@ if __name__ == '__main__':
     elif sys.argv[1] == "done":
         done(sys.argv)
     elif sys.argv[1] == "clean":
-        clean()
+        clean(sys.argv)
     else:
         print "Illegal Parameters"
         print usage
