@@ -72,7 +72,7 @@ def show(params):
         conn = sqlite3.connect("/tmp/zap.db")
         cursor = conn.execute("SELECT * FROM tasks")
         for row in cursor:
-            print "------------------------------------------------------------------------------"
+            print "-" * 40
             print row[0],"\t",row[1],"\t",row[2],"\t",row[3],"\t",row[4],"\n"
         conn.close()
 
