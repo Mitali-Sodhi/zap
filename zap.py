@@ -3,7 +3,7 @@
 import sys
 import os
 import sqlite3
-from colorama import Fore, Back, Style
+from colorama import Fore
 from prettytable import PrettyTable
 
 
@@ -84,14 +84,16 @@ def show(params):
         if len(data) == 0:
             print "Your Zap list is empty. Add a new list by zap add <task> <tag> <priority>"
         else:
+            output_table = PrettyTable()
+            output_table.field_names = ["#", "Task", "Tag", "Priority", "Added On"]
             for row in data:
-                print "-" * 60
                 if row[3] == "high":
-                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.RED + row[3]), (Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"
+                    output_table.add_row([row[0], row[1], row[2], (Fore.RED + row[3]), row[4]])
                 elif row[3] == "normal":
-                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.YELLOW + row[3]), (Fore.RESET + Back.RESET + Style.RESET_ALL), row[4], "\n"
+                    output_table.add_row([row[0], row[1], row[2], (Fore.YELLOW + row[3]), row[4]])
                 elif row[3] == "low":
-                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.GREEN + row[3]), (Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"
+                    output_table.add_row([row[0], row[1], row[2], (Fore.GREEN + row[3]), row[4]])
+            print output_table
         conn.close()
 
 
