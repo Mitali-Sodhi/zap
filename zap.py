@@ -122,13 +122,13 @@ def done(params):
                 conn.execute(query_string)
                 conn.execute("DELETE from sqlite_sequence where name='tasks'")
                 conn.commit()
-                print item, "successfully deleted from your Zap list"
+                print "Good work on finishing %s!" % item
             else:
                 query_string = "DELETE from tasks where task='%s'" % item
                 conn.execute(query_string)
                 conn.execute("DELETE from sqlite_sequence where name='tasks'")
                 conn.commit()
-                print item, "successfully deleted from your Zap list"
+                print "Good work on finishing %s!" % item
         conn.close()
 
 
