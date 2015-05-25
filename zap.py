@@ -3,8 +3,18 @@
 import sys
 import os
 import sqlite3
-from colorama import Fore
 from prettytable import PrettyTable
+
+
+def colorify(text, color):
+    if color == "yellow":
+        return '\033[93m' + text + '\033[0m'
+    elif color == "green":
+        return '\033[92m' + text + '\033[0m'
+    elif color == "red":
+        return '\033[91m' + text + '\033[0m'
+    else:
+        return text
 
 
 def start():
@@ -88,11 +98,11 @@ def show(params):
             output_table.field_names = ["#", "Task", "Tag", "Priority", "Added On"]
             for row in data:
                 if row[3] == "high":
-                    output_table.add_row([row[0], row[1], row[2], (Fore.RED + row[3]), row[4]])
+                    output_table.add_row([row[0], row[1], row[2], colorify(row[3], "red"), row[4]])
                 elif row[3] == "normal":
-                    output_table.add_row([row[0], row[1], row[2], (Fore.YELLOW + row[3]), row[4]])
+                    output_table.add_row([row[0], row[1], row[2], colorify(row[3], "yellow"), row[4]])
                 elif row[3] == "low":
-                    output_table.add_row([row[0], row[1], row[2], (Fore.GREEN + row[3]), row[4]])
+                    output_table.add_row([row[0], row[1], row[2], colorify(row[3], "green"), row[4]])
             print output_table
         conn.close()
 
