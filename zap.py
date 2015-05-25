@@ -3,8 +3,8 @@
 import sys
 import os
 import sqlite3
-import colorama
 from colorama import Fore, Back, Style
+from prettytable import PrettyTable
 
 
 def start():
@@ -14,20 +14,25 @@ def start():
         conn = sqlite3.connect("/tmp/zap.db")
         conn.execute('''CREATE TABLE tasks (id INTEGER PRIMARY KEY , task TEXT NOT NULL, tag TEXT NOT NULL, priority TEXT NOT NULL, added_on TIMESTAMP);''')
         conn.close()
-        print "Zap list initialized Successfully. Use 'zap add' to add new tasks"
+        print "Zap list initialized successfully! Use 'zap add' to add new tasks"
 
 
 def add(params):
     if len(sys.argv) < 3:
         print "Enter item to be added in your Zap list, followed by optional tag and priority"
         sys.exit(0)
-    conn = sqlite3.connect("/tmp/zap.db")
+
+    if os.path.isfile("/tmp/zap.db"):
+        conn = sqlite3.connect("/tmp/zap.db")
+    else:
+        print "Your Zap list is not initialized. Use 'zap start' to get started"
+        sys.exit(0)
 
     task_name = params[2]
     tag = "NA"
     priority = "normal"
 
-    if len(sys.argv) == 4:
+    if len(params) == 4:
         option1 = params[3].split(':')
         if len(option1) < 2:
             print "Give options seperated by :"
@@ -39,7 +44,7 @@ def add(params):
         else:
             print "Enter either tag or priority as options"
             sys.exit(0)
-    elif len(sys.argv) == 5:
+    elif len(params) == 5:
         option1 = params[3].split(':')
         option2 = params[4].split(':')
         if len(option1) < 2 or len(option2) < 2:
@@ -57,7 +62,9 @@ def add(params):
             sys.exit(0)
     elif len(sys.argv) > 5:
         print "Illegal Parameters"
+        print usage
         sys.exit(0)
+
     query_string = "INSERT INTO tasks (task,tag,priority,added_on) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP);" % (task_name, tag, priority)
     conn.execute(query_string)
     print task_name, "added successfully to your Zap list :)"
@@ -67,7 +74,8 @@ def add(params):
 
 def show(params):
     if len(params) > 2:
-        print "Illegal Parameters"
+        print "Wrong Parameters"
+        print usage
         sys.exit(0)
     else:
         conn = sqlite3.connect("/tmp/zap.db")
@@ -79,25 +87,25 @@ def show(params):
             for row in data:
                 print "-" * 60
                 if row[3] == "high":
-                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.RED + row[3]),(Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"
+                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.RED + row[3]), (Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"
                 elif row[3] == "normal":
-                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.YELLOW + row[3]),(Fore.RESET + Back.RESET + Style.RESET_ALL),row[4], "\n"
+                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.YELLOW + row[3]), (Fore.RESET + Back.RESET + Style.RESET_ALL), row[4], "\n"
                 elif row[3] == "low":
-                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.GREEN + row[3]),(Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"        
-
+                    print row[0], "\t", row[1], "\t", row[2], "\t", (Fore.GREEN + row[3]), (Fore.RESET + Back.RESET + Style.RESET_ALL), "\t", row[4], "\n"
         conn.close()
 
 
 def done(params):
     if len(params) == 2 or len(params) > 3:
-        print "Illegal Parameters"
+        print "Wrong Parameters"
+        print usage
         sys.exit(0)
     else:
         params = params[2]
         params = params.split(',')
         conn = sqlite3.connect("/tmp/zap.db")
         for item in params:
-            if item.isdigit() :
+            if item.isdigit():
                 query_string = "DELETE from tasks where ID=%s" % int(item)
                 conn.execute(query_string)
                 conn.execute("DELETE from sqlite_sequence where name='tasks'")
@@ -114,17 +122,18 @@ def done(params):
 
 def clean(params):
     if len(params) > 2:
-        print "Illegal Parameters"
+        print "Wrong Parameters."
+        print usage
         sys.exit(0)
     else:
-        confirmation = raw_input("Are you sure (y/n)?")
+        confirmation = raw_input("Are you sure (y/n)?\t")
         if confirmation.lower().startswith("y"):
             conn = sqlite3.connect("/tmp/zap.db")
             conn.execute("DELETE from tasks")
             conn.execute("DELETE from sqlite_sequence where name='tasks'")
             conn.commit()
             conn.close()
-            print "Cleaned up your Zap list"
+            print "Cleaned up your Zap list! Use 'zap add' to add new tasks"
 
 
 if __name__ == '__main__':
