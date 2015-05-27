@@ -24,7 +24,7 @@ def start():
         conn = sqlite3.connect("/tmp/zap.db")
         conn.execute('''CREATE TABLE tasks (id INTEGER PRIMARY KEY , task TEXT NOT NULL, tag TEXT NOT NULL, priority TEXT NOT NULL, added_on TIMESTAMP);''')
         conn.close()
-        print "Zap list initialized successfully! Use 'zap add' to add new tasks"
+        print "Zap list initialized successfully! \xF0\x9F\x91\x8C Use 'zap add' to add new tasks"
 
 
 def add(params):
@@ -77,7 +77,7 @@ def add(params):
 
     query_string = "INSERT INTO tasks (task,tag,priority,added_on) VALUES ('%s', '%s', '%s', CURRENT_TIMESTAMP);" % (task_name, tag, priority)
     conn.execute(query_string)
-    print task_name, "added successfully to your Zap list :)"
+    print task_name, "added \xF0\x9F\x91\x8D"
     conn.commit()
     conn.close()
 
@@ -122,13 +122,13 @@ def done(params):
                 conn.execute(query_string)
                 conn.execute("DELETE from sqlite_sequence where name='tasks'")
                 conn.commit()
-                print "Good work on finishing %s!" % item
+                print "Good work on finishing %s! \xF0\x9F\x91\x8F" % item
             else:
                 query_string = "DELETE from tasks where task='%s'" % item
                 conn.execute(query_string)
                 conn.execute("DELETE from sqlite_sequence where name='tasks'")
                 conn.commit()
-                print "Good work on finishing %s!" % item
+                print "Good work on finishing %s! \xF0\x9F\x91\x8F" % item
         conn.close()
 
 
@@ -145,7 +145,7 @@ def clean(params):
             conn.execute("DELETE from sqlite_sequence where name='tasks'")
             conn.commit()
             conn.close()
-            print "Cleaned up your Zap list! Use 'zap add' to add new tasks"
+            print "Cleaned up your Zap list! \xF0\x9F\x92\xA5 Use 'zap add' to add new tasks"
 
 
 if __name__ == '__main__':
